@@ -1,13 +1,12 @@
 import Button from 'react-bootstrap/Button';
+import { useNavigate, NavLink, Navigate } from "react-router-dom";
 
-function PanelOption({ panelId, title }) {
+function PanelOption({ panelId, title, path }) {
 
-    const handleSections = (e) => {
-        console.log('e', e)
-    }
+    const navigate = useNavigate();
 
     return (
-        <Button key={panelId} variant="link" className="a-mod" onClick={handleSections}>{title}</Button>
+        <NavLink key={panelId} to={path}>{title}</NavLink>
     )
 }
 

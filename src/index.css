@@ -11,9 +11,9 @@ body {
   padding: 0;
   background: rgba(195, 20, 50, 0.5);
   /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, rgba(36, 11, 54, 0.5), rgba(195, 20, 50, 0.5)), url("./assets/obligatorioBackground.jpg") no-repeat center center fixed;
+  background: url("./assets/obligatorioBackground.jpg") no-repeat center center fixed;
   /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, rgba(36, 11, 54, 0.5), rgba(195, 20, 50, 0.5)), url("./assets/obligatorioBackground.jpg") no-repeat center center fixed;
+  background: url("./assets/obligatorioBackground.jpg") no-repeat center center fixed;
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   box-shadow: 0px -5px 5px 0px rgba(lighten(var(--primaryColor), 5%), 0.75), inset 0 0 25px 1px rgba(darken(var(--primaryColor), 15%), 0.75);
   -webkit-background-size: cover;

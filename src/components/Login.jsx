@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { loginService } from "../services/services";
+import { loadUser } from "../redux/features/userSlice";
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, NavLink, Navigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
@@ -9,29 +12,43 @@ import ContentBody from './ContentBody';
 import Header from './Header';
 import '../css/login.css';
 
-function Login({ logged, handleSession }) {
-    const [submitDisabled, setSubmitDisabled] = useState(true);
-    const [user, setUser] = useState("");
-    const [pass, setPass] = useState("");
+function Login() {
 
-    const handleChange = (e) => {
-        e.target.id === 'formBasicUser' ? setUser(e.target.value) : setPass(e.target.value);
-    }
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [submitDisabled, setSubmitDisabled] = useState(true);
+    const userRef = useRef("");
+    const passRef = useRef("");
+    const sessionUser = useSelector((state) => state.user);
+
+
 
     //Cambio el estado del disabled del submit si ambos campos fueron completados
-    useEffect(() => {
-        if (user.length > 0 && pass.length > 0) setSubmitDisabled(false);
-        else setSubmitDisabled(true);
-    }, [user, pass])
+    const handleChange = () => {
+        const user = userRef.current.value.trim();
+        const pass = passRef.current.value.trim();
+        setSubmitDisabled(user.length > 0 && pass.length > 0 ? false : true);
+    }
 
     const loginResponse = async () => {
-        const response = await loginService(user, pass);
-        console.log('response', response);
-        if (response.codigo === 200) {
-            handleSession(true, response.apiKey);
+        const user = userRef.current.value.trim();
+        const pass = passRef.current.value.trim();
+
+        try {
+            const response = await loginService(user, pass);
+            if (response.codigo === 200) {
+                dispatch(loadUser({ id: response.id, username: user, apikey: response.apiKey }));
+                localStorage.setItem('userId', response.id);
+                localStorage.setItem('username', user);
+                localStorage.setItem('apikey', response.apiKey);
+                navigate("/");
+            }
+            else {
+                //TODO: Manejar el mensaje para mostrar el alert
+            }
         }
-        else {
-            //TODO: Manejar el mensaje para mostrar el alert
+        catch (error) {
+            alert(error);
         }
     }
 
@@ -40,11 +57,10 @@ function Login({ logged, handleSession }) {
         loginResponse();
     }
 
-    if (logged) {
+    if (sessionUser.logged) {
         return (
             <>
-                <Header handleSession={handleSession} />
-                <ContentBody title="Inicio" content={'Bienvenido!'} />
+                <ContentBody />
             </>
         );
     }
@@ -58,14 +74,14 @@ function Login({ logged, handleSession }) {
                                 <h1>Login</h1>
                             </div>
                         </div>
-                        <Form onSubmit={onSubmit}>
+                        <Form onSubmit={onSubmit} onChange={handleChange}>
                             <Form.Group className="mb-3" controlId="formBasicUser">
                                 <Form.Label className="form-label">Usuario</Form.Label>
-                                <Form.Control type="text" placeholder="usuario" value={user} name="txtUser" onChange={handleChange} />
+                                <Form.Control type="text" ref={userRef} name="txtUser" placeholder="usuario" />
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="formBasicPass">
-                                <Form.Label className="form-label">Contraseña</Form.Label>
-                                <Form.Control type="password" value={pass} name="txtPass" placeholder="contraseña" onChange={handleChange} />
+                                <Form.Label className="form-label">Contraseña: qwerty$censo</Form.Label>
+                                <Form.Control type="password" ref={passRef} name="txtPass" placeholder="contraseña" />
                             </Form.Group>
                             <Form.Group className="mb-3 text-center">
                                 <Button variant="primary" type="submit" disabled={submitDisabled}>Iniciar Sesión</Button>

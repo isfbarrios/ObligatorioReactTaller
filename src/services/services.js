@@ -1,20 +1,46 @@
 const baseURL = "https://censo.develotion.com";
 
 export const loginService = async (user, pass) => {
-    return await censoFetch(`${baseURL}/login.php`, { "usuario": user, "password": pass });
+    return await fetch(`${baseURL}/login.php`,
+        {
+            method: 'POST',
+            body: JSON.stringify(
+                {
+                    "usuario": user,
+                    "password": pass
+                }),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' }
+        })
+        .then((response) => response.json())
+        .then(response => { return response })
+        .catch(error => { return error });
 }
 
+export const loadDepartmentsService = async (userId, apikey) => {
+    return await fetch(`${baseURL}/departamentos.php`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                "apikey": apikey,
+                "iduser": userId
+            }
+        })
+        .then((response) => response.json())
+        .then(response => { return response })
+        .catch(error => { return error });
+}
 
-
-//Fetch generico
-const censoFetch = async (url, body) => await doFetch(url, 'POST', body, { 'Content-type': 'application/json; charset=UTF-8' });
-
-const doFetch = async (url, method, body, headers) => {
-    return await fetch(url, {
-        method: method,
-        body: JSON.stringify(body),
-        headers: headers
-    })
+export const loadCitiesService = async (userId, apikey) => {
+    return await fetch(`${baseURL}/ciudades.php`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                "apikey": apikey,
+                "iduser": userId
+            }
+        })
         .then((response) => response.json())
         .then(response => { return response })
         .catch(error => { return error });

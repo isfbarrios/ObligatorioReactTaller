@@ -1,24 +1,24 @@
-import { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import Login from './components/Login';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './components/Home';
+import AgregarCenso from './components/AgregarCenso';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import ContentBody from './components/ContentBody';
 
 function App() {
 
-  const [logged, setLogged] = useState(localStorage.getItem('apiKey') == null ? false : true);
-
-  const handleSession = (isLogged, apiKey) => {
-    setLogged(isLogged);
-    if (!isLogged) localStorage.removeItem('apiKey');
-    else {
-      if (apiKey.length > 0) localStorage.setItem('apiKey', apiKey);
-      else setLogged(false);
-    }
-  };
-
   return (
-    <>
-      <Login logged={logged} handleSession={handleSession} />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<ContentBody />}>
+          <Route index element={<Home />} />
+          <Route path="nuevo-censo" element={<AgregarCenso />} />
+        </Route>
+        <Route path="*" element={<Navigate replace to={"/"}></Navigate>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 export default App
