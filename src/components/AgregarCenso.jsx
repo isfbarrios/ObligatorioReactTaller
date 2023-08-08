@@ -1,16 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { loadUser } from "../redux/features/userSlice";
-import { useNavigate, NavLink, Navigate } from "react-router-dom";
-import Container from 'react-bootstrap/Container';
+
+import { insertPersonService } from "../services/services";
+
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import Alert from 'react-bootstrap/Alert';
+
 import Header from './Header';
+
 
 function AgregarCenso() {
 
+    const [alertType, setAlertType] = useState(false);
+    const [alert, setAlert] = useState("");
+    const [validated, setValidated] = useState(false);
     const dispatch = useDispatch();
     const nameRef = useRef("");
     const departmentRef = useRef("");
@@ -19,13 +24,9 @@ function AgregarCenso() {
     const ocupationRef = useRef("");
     const sessionUser = useSelector((state) => state.user);
     const sessionDepartment = useSelector((state) => state.department);
+    const sessionOcupation = useSelector((state) => state.ocupation);
     const sessionCity = useSelector((state) => state.city);
     const [cities, setCities] = useState();
-
-    const onSubmit = (e) => {
-        e.preventDefault();
-        //loginResponse();
-    }
 
     useEffect(() => {
         if (localStorage.getItem('apikey') && sessionUser.apikey.length == 0) {
@@ -39,62 +40,128 @@ function AgregarCenso() {
         setCities(sessionCity.filter(city => city.idDepartamento == departmentRef.current.value));
     }
 
+    const onChange = (e) => {
+        setValidated(false);
+        const name = nameRef.current.value;
+        const department = departmentRef.current.value;
+        const city = cityRef.current.value;
+        const birthdate = birthdateRef.current.value;
+        const ocupation = ocupationRef.current.value;
+
+        let deptAux = sessionDepartment.find(d => d.id == department);
+        let cityAux = sessionCity.find(c => c.id == city);
+        let ocupAux = sessionOcupation.find(o => o.id == ocupation);
+
+        if (deptAux != undefined && deptAux != null
+            && cityAux != undefined && cityAux != null
+            && ocupAux != undefined && ocupAux != null
+            && name.length > 0 && birthdate.length > 0) setValidated(true);
+    }
+
+    const registrarCenso = async (jsonObject) => {
+        try {
+            const response = await insertPersonService(sessionUser.id, sessionUser.apikey, jsonObject);
+
+            if (response.codigo === 200) {
+                setAlert(response.mensaje.trim());
+                setAlertType(true);
+            }
+            else {
+                setAlert(response.mensaje.trim());
+            }
+        }
+        catch (error) {
+            alert('AgregarCenso.registrarCenso.insertPerson ' + error);
+        }
+    }
+
+    const onSubmit = (e) => {
+        e.preventDefault();
+
+        const name = nameRef.current.value;
+        const department = departmentRef.current.value;
+        const city = cityRef.current.value;
+        const birthdate = birthdateRef.current.value;
+        const ocupation = ocupationRef.current.value;
+
+        let jsonObject = {
+            "idUsuario": sessionUser.id,
+            "nombre": name.trim(),
+            "departamento": department,
+            "ciudad": city,
+            "fechaNacimiento": birthdate,
+            "ocupacion": ocupation
+        }
+        registrarCenso(jsonObject);
+
+        setTimeout(() => {
+            setAlert("");
+            setAlertType(false);
+        }, 5000);
+    }
+
     return (
         <>
-            <Container fluid className="pt-5 pb-3" >
-                <Row>
-                    <Col md={12} className="mx-auto">
-                        <div className="home-page">
-                            <div className="page-title">
-                                <div className="logo">
-                                    <div className="col-md-12 py-1 px-3">
-                                        <h4>Nuevo censo</h4>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="page-content col-md-6">
-                                <Form onSubmit={onSubmit}>
-                                    <Form.Group className="mb-3" controlId="formBasicName">
-                                        <Form.Label className="form-label">Nombre</Form.Label>
-                                        <Form.Control type="text" ref={nameRef} name="txtName" placeholder="John Doe" />
-                                    </Form.Group>
-                                    <Form.Group className="mb-3" controlId="formBasicDepartment">
-                                        <Form.Label className="form-label">Departamento</Form.Label>
-                                        <Form.Select ref={departmentRef} name="txtDepartment" onChange={handleChange}>
-                                            <option value="-1">Seleccione un departamento</option>
-                                            {sessionDepartment?.map((dep) =>
-                                                <option value={dep.id}>{dep.nombre}</option>
-                                            )}
-                                        </Form.Select>
-                                    </Form.Group>
-                                    <Form.Group className="mb-3" controlId="formBasicCity">
-                                        <Form.Label className="form-label">Ciudad</Form.Label>
-                                        <Form.Select ref={cityRef} name="txtCity">
-                                            <option value="-1">Seleccione una ciudad</option>
-                                            {cities?.map(city =>
-                                                <option value={city.id} data-depId={city.idDepartamento}>{city.nombre}</option>
-                                            )}
-                                        </Form.Select>
-                                    </Form.Group>
-                                    <Form.Group className="mb-3" controlId="formBasicDate">
-                                        <Form.Label className="form-label">Fecha de nacimiento</Form.Label>
-                                        <Form.Control type="date" ref={birthdateRef} name="txtBirthdate" />
-                                    </Form.Group>
-                                    <Form.Group className="mb-3" controlId="formBasicOcupation">
-                                        <Form.Label className="form-label">Ocupaci&oacute;n</Form.Label>
-                                        <Form.Select ref={ocupationRef} name="txtOcupation">
-                                            <option value="-1">Seleccione una ocupaci&oacute;n</option>
-                                        </Form.Select>
-                                    </Form.Group>
-                                    <Form.Group className="mb-3 text-center">
-                                        <Button variant="secondary" type="button">Registrar censo</Button>
-                                    </Form.Group>
-                                </Form>
-                            </div>
-                        </div>
-                    </Col>
-                </Row>
-            </Container >
+            <Alert
+                style={alert.length > 0 ? { visibility: "initial", marginBottom: "5px" } : { visibility: "hidden", marginBottom: "5px" }}
+                key={alertType ? 'success' : 'danger'}
+                variant={alertType ? 'success' : 'danger'}>{alert}
+            </Alert>
+            <Form noValidate validated={validated} onSubmit={onSubmit} onChange={onChange}>
+                <Form.Group className="mb-3" controlId="validationCustom01">
+                    <Form.Label className="form-label">Nombre</Form.Label>
+                    <Form.Control type="text" ref={nameRef} name="txtName" placeholder="John Doe" min="1" max="30" required />
+                    <Form.Control.Feedback type="invalid">
+                        Por favor, ingrese un nombre valido.
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="validationCustom02">
+                    <Form.Label className="form-label">Departamento</Form.Label>
+                    <Form.Select ref={departmentRef} name="txtDepartment" onChange={handleChange} required>
+                        <option value="-1">Seleccione un departamento</option>
+                        {sessionDepartment?.map((dep) =>
+                            <option value={dep.id} key={dep.id}>{dep.nombre}</option>
+                        )}
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                        Por favor, seleccione un departamento valido.
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="validationCustom03">
+                    <Form.Label className="form-label">Ciudad</Form.Label>
+                    <Form.Select ref={cityRef} name="txtCity" required>
+                        <option value="-1">Seleccione una ciudad</option>
+                        {cities?.map(city =>
+                            <option value={city.id} key={city.id}>{city.nombre}</option>
+                        )}
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                        Por favor, seleccione una ciudad valida.
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="validationCustom04">
+                    <Form.Label className="form-label">Fecha de nacimiento</Form.Label>
+                    <Form.Control type="date" ref={birthdateRef} name="txtBirthdate" required />
+                    <Form.Control.Feedback type="invalid">
+                        Por favor, seleccione una fecha valida.
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="validationCustom05">
+                    <Form.Label className="form-label">Ocupaci&oacute;n</Form.Label>
+                    <Form.Select ref={ocupationRef} name="txtOcupation" required>
+                        <option value="-1">Seleccione una ocupaci&oacute;n</option>
+                        {sessionOcupation?.map(ocupation =>
+                            <option value={ocupation.id} key={ocupation.id}>{ocupation.ocupacion}</option>
+                        )}
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                        Por favor, seleccione una ocupaci&oacute;n valida.
+                    </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mb-3 text-center">
+                    <Button variant="secondary" type="submit" disabled={!validated}>Registrar censo</Button>
+                </Form.Group>
+            </Form>
         </>
     )
 }

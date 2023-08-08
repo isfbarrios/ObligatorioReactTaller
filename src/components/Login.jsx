@@ -8,6 +8,7 @@ import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Alert from 'react-bootstrap/Alert';
 import ContentBody from './ContentBody';
 import Header from './Header';
 import '../css/login.css';
@@ -20,8 +21,15 @@ function Login() {
     const userRef = useRef("");
     const passRef = useRef("");
     const sessionUser = useSelector((state) => state.user);
+    const [alertType, setAlertType] = useState(false);
+    const [alert, setAlert] = useState("");
 
-
+    const cleanAlert = () => {
+        setTimeout(() => {
+            setAlert("");
+            setAlertType(false);
+        }, 4000);
+    }
 
     //Cambio el estado del disabled del submit si ambos campos fueron completados
     const handleChange = () => {
@@ -44,7 +52,9 @@ function Login() {
                 navigate("/");
             }
             else {
-                //TODO: Manejar el mensaje para mostrar el alert
+                setAlert(response.mensaje.trim());
+                setAlertType(true);
+                cleanAlert();
             }
         }
         catch (error) {
@@ -55,6 +65,11 @@ function Login() {
     const onSubmit = (e) => {
         e.preventDefault();
         loginResponse();
+    }
+
+    const onViewSubmit = (e) => {
+        e.preventDefault();
+        navigate('register');
     }
 
     if (sessionUser.logged) {
@@ -74,26 +89,33 @@ function Login() {
                                 <h1>Login</h1>
                             </div>
                         </div>
+                        <Alert
+                            style={alert.length > 0 ? { visibility: "initial", marginBottom: "5px" } : { visibility: "hidden", marginBottom: "5px" }}
+                            key={alertType ? 'success' : 'danger'}
+                            variant={alertType ? 'success' : 'danger'}>{alert}
+                        </Alert>
                         <Form onSubmit={onSubmit} onChange={handleChange}>
                             <Form.Group className="mb-3" controlId="formBasicUser">
                                 <Form.Label className="form-label">Usuario</Form.Label>
                                 <Form.Control type="text" ref={userRef} name="txtUser" placeholder="usuario" />
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="formBasicPass">
-                                <Form.Label className="form-label">Contraseña: qwerty$censo</Form.Label>
-                                <Form.Control type="password" ref={passRef} name="txtPass" placeholder="contraseña" />
+                                <Form.Label className="form-label">Contraseña:</Form.Label>
+                                <Form.Control type="password" ref={passRef} name="txtPass" placeholder="contraseña" autoComplete="on" />
                             </Form.Group>
-                            <Form.Group className="mb-3 text-center">
+                            <Form.Group className="mb-2 text-center">
                                 <Button variant="primary" type="submit" disabled={submitDisabled}>Iniciar Sesión</Button>
                             </Form.Group>
-                            <div className="col-md-12">
-                                <div className="login-or">
-                                    <hr className="hr-or" />
-                                    <span className="span-or">o</span>
-                                </div>
+                        </Form>
+                        <div className="col-md-12">
+                            <div className="login-or">
+                                <hr className="hr-or" />
+                                <span className="span-or">o</span>
                             </div>
-                            <Form.Group className="mb-3 text-center">
-                                <Button variant="secondary" type="button">Registrarse</Button>
+                        </div>
+                        <Form onSubmit={onViewSubmit}>
+                            <Form.Group className="mb-2 mt-2 text-center">
+                                <Button variant="secondary" type="submit">Registrarse</Button>
                             </Form.Group>
                         </Form>
                     </div>

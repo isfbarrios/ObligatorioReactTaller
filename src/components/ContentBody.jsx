@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, NavLink, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { Outlet } from 'react-router-dom';
+
 import { loadDepartments } from "../redux/features/departmentSlice";
 import { loadCities } from "../redux/features/citySlice";
-import { loadDepartmentsService, loadCitiesService } from "../services/services";
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { loadCenso } from "../redux/features/censoSlice";
+import { loadOcupations } from "../redux/features/ocupationSlice";
+import { loadDepartmentsService, loadCitiesService, loadOcupationsService, loadCensosService } from "../services/services";
+
 import Header from './Header';
 
 function ContentBody() {
@@ -21,10 +22,11 @@ function ContentBody() {
         if (!existApiKey) {
             navigate("/login");
         }
-
         //Precarga de datos
         loadDepartamentos();
         loadCiudades();
+        loadOcupaciones();
+        loadCensos();
     }, [])
 
     const loadDepartamentos = async () => {
@@ -34,8 +36,8 @@ function ContentBody() {
             if (response.codigo === 200) {
                 let deps = [];
                 response.departamentos.forEach((dep) => {
-                    let { id, nombre } = dep;
-                    deps = [...deps, { id, nombre }];
+                    let { id, nombre, latitud, longitud } = dep;
+                    deps = [...deps, { id, nombre, latitud, longitud }];
                 });
                 dispatch(loadDepartments(deps));
             }
@@ -44,7 +46,7 @@ function ContentBody() {
             }
         }
         catch (error) {
-            alert(error);
+            alert('ContentBody.loadDepartamentos ' + error);
         }
     }
 
@@ -65,7 +67,39 @@ function ContentBody() {
             }
         }
         catch (error) {
-            alert(error);
+            alert('ContentBody.loadCiudades ' + error);
+        }
+    }
+
+    const loadOcupaciones = async () => {
+        try {
+            const response = await loadOcupationsService(sessionUser.id, sessionUser.apikey);
+
+            if (response.codigo === 200) {
+                dispatch(loadOcupations(response.ocupaciones));
+            }
+            else {
+                //TODO: Manejar el mensaje para mostrar el alert
+            }
+        }
+        catch (error) {
+            alert('ContentBody.loadOcupaciones ' + error);
+        }
+    }
+
+    const loadCensos = async () => {
+        try {
+            const response = await loadCensosService(sessionUser.id, sessionUser.apikey);
+
+            if (response.codigo === 200) {
+                dispatch(loadCenso(response.personas));
+            }
+            else {
+                //TODO: Manejar el mensaje para mostrar el alert
+            }
+        }
+        catch (error) {
+            alert('ContentBody.loadOcupaciones ' + error);
         }
     }
 

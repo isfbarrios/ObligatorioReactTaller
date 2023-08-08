@@ -26,10 +26,10 @@ a {
   text-decoration: none !important;
 }
 
-h1,
-h2,
-h3 {
-  font-family: 'Kaushan Script', cursive;
+a:hover,
+button[class="btn-link"]:hover {
+  color: white;
+  text-decoration: none !important;
 }
 
 .home-page {
@@ -48,6 +48,10 @@ h3 {
   border-radius: 1.1rem;
   outline: 0;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+}
+
+.home-page.home {
+  min-height: inherit;
 }
 
 .home-page .page-title {
@@ -72,16 +76,46 @@ h3 {
   padding: 0 1.4rem;
 }
 
-.toolbar .sections .section-container {
+.report-home .report-home-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+}
+
+.toolbar .sections .section-container {
+  display: grid;
+  grid-template: 1fr / 1fr 1fr 1fr;
   height: 45px;
+}
+
+.toolbar .sections .section-container .menu-panel {
+  justify-self: left;
+  align-self: center;
+}
+
+.toolbar .sections .section-container .time-panel {
+  justify-self: center;
+  align-self: center;
+}
+
+.toolbar .sections .section-container .logout-panel {
+  justify-self: right;
+  align-self: center;
+}
+
+.toolbar .sections .section-container .time-panel {
+  color: white;
+  font-weight: bold;
+  font-size: 21px;
+  letter-spacing: 2px;
 }
 
 .a-mod {
   color: #fff;
   text-decoration: none;
+}
+
+.map-container .home-page {
+  height: 700px;
 }
 
 .a-mod:hover:active:focus:focus-visible {
@@ -153,9 +187,6 @@ form .error {
   color: #ff0000;
 }
 
-#second {
-  display: none;
-}
 
 .logout-form button,
 .home-form button {

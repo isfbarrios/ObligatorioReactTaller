@@ -6,7 +6,7 @@ function PanelOption({ panelId, title, path }) {
     const navigate = useNavigate();
 
     return (
-        <NavLink key={panelId} to={path}>{title}</NavLink>
+        <NavLink style={{ color: "white", textShadow: "1px 1px black", fontWeight: "bold", padding: "5px 10px" }} key={panelId} to={path}>{title}</NavLink>
     )
 }
 

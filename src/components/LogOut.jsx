@@ -19,7 +19,7 @@ function LogOut() {
     };
 
     return (
-        <Form onSubmit={onSubmit}>
+        <Form className="logout-panel" onSubmit={onSubmit}>
             <Form.Group className="logout-form text-center">
                 <Button variant="link" className="a-mod" type="submit" title="Cerrar sesión">
                     <FontAwesomeIcon icon={faRightFromBracket} />
